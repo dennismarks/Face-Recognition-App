@@ -4,6 +4,8 @@ import Navigation from './Components/Navigation/Navigation';
 import Logo from './Components/Logo/Logo';
 import ImageLinkForm from './Components/ImageLinkForm/ImageLinkForm';
 import FaceRecognition from './Components/FaceRecognition/FaceRecognition';
+import Signin from './Components/SignIn/SignIn';
+import Register from './Components/Register/Register';
 import './App.css';
 
 const app = new Clarifai.App({
@@ -16,7 +18,8 @@ class App extends Component {
         this.state = {
             input: '',
             imageURL: '',
-            box: {},
+			box: {},
+			route: 'signin'
         }
     }
 
@@ -49,17 +52,39 @@ class App extends Component {
             .catch(err => console.log(err));
     }
 
-    render() {
-        return (
-            <div className="App">
-                <Navigation />
-                <Logo />
-                <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit} />
-                <FaceRecognition box={this.state.box} imageURL={this.state.imageURL}/>
-            </div>
-          );
-    }
-    
+onRouteChange = (route) => {
+    if (route === 'signout') {
+      this.setState({isSignedIn: false})
+    } else if (route === 'home') {
+      this.setState({isSignedIn: true})
+    }
+    this.setState({route: route});
+  }
+
+  render() {
+    const { isSignedIn, imageUrl, route, box } = this.state;
+    return (
+      <div className="App">
+        <Navigation isSignedIn={isSignedIn} onRouteChange={this.onRouteChange} />
+        { route === 'home'
+          ? <div>
+              <Logo />
+              <ImageLinkForm
+                onInputChange={this.onInputChange}
+                onButtonSubmit={this.onButtonSubmit}
+              />
+              <FaceRecognition box={box} imageUrl={imageUrl} />
+            </div>
+          : (
+             route === 'signin'
+             ? <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
+             : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
+            )
+        }
+      </div>
+    );
+  }
+  
 }
 
 export default App;
